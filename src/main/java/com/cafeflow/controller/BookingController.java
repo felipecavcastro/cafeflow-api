@@ -74,4 +74,10 @@ public class BookingController {
             return "Check-out realizado! O cliente deve pagar R$ " + String.format("%.2f", extra) + " adicionais. Mesa liberada.";
         }
     }
+    // Listar todas as reservas para conferir nomes, créditos e horários
+    @GetMapping
+    public List<Booking> getAll() {
+        return bookingRepo.findAll();
+    }
+
 }

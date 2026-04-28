@@ -23,4 +23,11 @@ public class Booking {
 
     @Enumerated(EnumType.STRING)
     private BookingStatus status = BookingStatus.PENDING;
+
+    // Este método roda automaticamente antes da reserva ser salva no banco
+    @PrePersist
+    protected void onCreate() {
+        this.startTime = LocalDateTime.now(); // Pega a hora exata do computador
+    }
+
 }
