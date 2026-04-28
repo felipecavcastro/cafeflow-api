@@ -19,25 +19,30 @@ public class BookingController {
 
     @PostMapping
     public Booking create(@RequestBody Booking booking) {
-        // 1. Buscamos a mesa REAAL do banco de dados
+        // 1. REGRA DE NEGÓCIO: Valor mínimo de R$ 10,00
+        if (booking.getPrepaidAmount() < 10.0) {
+            throw new RuntimeException("O valor mínimo para reserva é R$ 10,00.");
+        }
+
+        // 2. Buscamos a mesa real do banco
         Station station = stationRepo.findById(booking.getStation().getId())
                 .orElseThrow(() -> new RuntimeException("Mesa não encontrada!"));
 
-        // 2. Verificamos se está disponível
+        // 3. Verificamos se está disponível
         if (!station.isAvailable()) {
             throw new RuntimeException("Esta mesa já está ocupada!");
         }
 
-        // 3. Marcamos como ocupada e SALVAMOS a mesa primeiro
+        // 4. Marcamos como ocupada e salvamos
         station.setAvailable(false);
         stationRepo.save(station);
 
-        // 4. Vinculamos a mesa salva ao agendamento
         booking.setStation(station);
         booking.setStatus(BookingStatus.ACTIVE);
 
         return bookingRepo.save(booking);
     }
+
 
     // 2. Lançar Consumo (O garçom adiciona o valor do café/pão de queijo)
     @PatchMapping("/{id}/consume")
