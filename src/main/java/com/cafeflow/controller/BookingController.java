@@ -85,4 +85,12 @@ public class BookingController {
         return bookingRepo.findAll();
     }
 
+    @GetMapping("/revenue")
+    public String getRevenue() {
+        Double total = bookingRepo.calculateTotalRevenue();
+        if (total == null) total = 0.0;
+        return "Faturamento total das reservas concluídas: R$ " + String.format("%.2f", total);
+    }
+
+
 }
