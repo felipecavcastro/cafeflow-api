@@ -18,7 +18,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // Desabilita proteção contra CSRF (padrão para APIs REST)
                 .authorizeHttpRequests(auth -> auth
                         // Liberar temporariamente o Swagger e os endpoints para conseguirmos testar
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/stations/**", "/bookings/**", "/users/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/stations/**", "/bookings/**", "/users/**", "/auth/**").permitAll()
                         .anyRequest().authenticated()
                 );
         return http.build();

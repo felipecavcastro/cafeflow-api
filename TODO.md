@@ -6,5 +6,5 @@
 - [x] Implementar Global Exception Handler (Erros profissionais)
 - [x] Adicionar validação de valor mínimo (R$ 10,00)
 - [x] Criar endpoint de faturamento e histórico (/revenue e /history)
-- [ ] Implementar Spring Security + JWT (Login e proteção de rotas)
+- [x] Implementar Spring Security + JWT (Login e proteção de rotas)
 - [ ] Criar controle de perfis (Admin para o Dono do Café / User para o Nômade)
