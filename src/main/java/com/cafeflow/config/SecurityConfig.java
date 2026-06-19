@@ -1,5 +1,6 @@
 package com.cafeflow.config;
 
+import com.cafeflow.service.JwtService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -7,25 +8,38 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final JwtService jwtService;
+
+    public SecurityConfig(JwtService jwtService) {
+        this.jwtService = jwtService;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Desabilita proteção contra CSRF (padrão para APIs REST)
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Liberar temporariamente o Swagger e os endpoints para conseguirmos testar
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/stations/**", "/bookings/**", "/users/**", "/auth/**").permitAll()
+                        // Rotas públicas (Cadastro e Login abertos)
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/users/register", "/auth/login").permitAll()
+                        // Rotas protegidas: Só o DONO (ADMIN) vê faturamento e histórico
+                        .requestMatchers("/bookings/revenue", "/bookings/history").hasRole("ADMIN")
+                        // Qualquer outra rota exige estar apenas logado
                         .anyRequest().authenticated()
-                );
+                )
+                // AJUSTE AQUI: Dizemos ao Spring para rodar o nosso filtro ANTES do filtro padrão de usuário/senha
+                .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); // Ferramenta que vai criptografar as senhas
+        return new BCryptPasswordEncoder();
     }
 }

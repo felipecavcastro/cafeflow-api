@@ -1,29 +1,31 @@
-package com.cafeflow.config;
+package com.cafeflow.service; // 1. O pacote precisa ser este!
 
 import com.cafeflow.model.User;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
-import java.security.Key;
+import javax.crypto.SecretKey; // Import correto do Java
 import java.util.Date;
 
 @Service
 public class JwtService {
 
-    // Geramos uma chave secreta segura para assinar os tokens
-    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-
-    // O token expira em 1 dia (86400000 milissegundos)
+    // Geramos uma chave secreta do tipo correto (SecretKey)
+    private final SecretKey key = Keys.secretKeyFor(io.jsonwebtoken.SignatureAlgorithm.HS256);
     private final long expirationTime = 86400000;
 
     public String generateToken(User user) {
         return Jwts.builder()
-                .setSubject(user.getUsername())
-                .claim("role", user.getRole()) // Guarda o perfil (ADMIN ou USER) no token [1]
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+                .subject(user.getUsername())
+                .claim("role", user.getRole())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(key)
                 .compact();
+    }
+
+    // 2. O MÉTODO QUE O FILTRO ESTÁ PROCURANDO:
+    public SecretKey getKey() {
+        return this.key;
     }
 }

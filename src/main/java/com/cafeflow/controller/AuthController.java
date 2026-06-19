@@ -3,7 +3,9 @@ package com.cafeflow.controller;
 import com.cafeflow.dto.LoginRequest;
 import com.cafeflow.model.User;
 import com.cafeflow.repository.UserRepository;
-import com.cafeflow.config.JwtService;
+
+import com.cafeflow.service.JwtService;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
