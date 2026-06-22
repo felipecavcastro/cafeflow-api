@@ -27,9 +27,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Rotas públicas (Cadastro e Login abertos)
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/users/register", "/auth/login").permitAll()
-                        // Rotas protegidas: Só o DONO (ADMIN) vê faturamento e histórico
-                        .requestMatchers("/bookings/revenue", "/bookings/history").hasRole("ADMIN")
-                        // Qualquer outra rota exige estar apenas logado
+                        // Rotas estritamente protegidas: Só o DONO (ADMIN) vê o faturamento bruto
+                        .requestMatchers("/bookings/revenue").hasRole("ADMIN")
+                        // Qualquer outra rota (incluindo o novo /bookings/history) exige apenas estar logado
                         .anyRequest().authenticated()
                 )
                 // AJUSTE AQUI: Dizemos ao Spring para rodar o nosso filtro ANTES do filtro padrão de usuário/senha

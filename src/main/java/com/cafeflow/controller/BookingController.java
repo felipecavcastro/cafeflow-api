@@ -2,6 +2,7 @@ package com.cafeflow.controller;
 
 import com.cafeflow.model.*;
 import com.cafeflow.repository.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -11,38 +12,46 @@ public class BookingController {
 
     private final BookingRepository bookingRepo;
     private final StationRepository stationRepo;
+    private final UserRepository userRepo;
 
-    public BookingController(BookingRepository bookingRepo, StationRepository stationRepo) {
+    public BookingController(BookingRepository bookingRepo, StationRepository stationRepo, UserRepository userRepo) {
         this.bookingRepo = bookingRepo;
         this.stationRepo = stationRepo;
+        this.userRepo = userRepo;
     }
 
+
     @PostMapping
-    public Booking create(@RequestBody Booking booking) {
-        // 1. REGRA DE NEGÓCIO: Valor mínimo de R$ 10,00
+    public Booking create(@RequestBody Booking booking, @AuthenticationPrincipal String username) {
+        // REGRA DE NEGÓCIO: Valor mínimo de R$ 10,00
         if (booking.getPrepaidAmount() < 10.0) {
             throw new RuntimeException("O valor mínimo para reserva é R$ 10,00.");
         }
 
-        // 2. Buscamos a mesa real do banco
+        // Buscamos a mesa real do banco
         Station station = stationRepo.findById(booking.getStation().getId())
                 .orElseThrow(() -> new RuntimeException("Mesa não encontrada!"));
 
-        // 3. Verificamos se está disponível
+        // Verificamos se está disponível
         if (!station.isAvailable()) {
             throw new RuntimeException("Esta mesa já está ocupada!");
         }
 
-        // 4. Marcamos como ocupada e salvamos
+        // CAPTURA AUTOMÁTICA: Busca o usuário que está logado no token
+        com.cafeflow.model.User currentUser = userRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuário logado não encontrado!"));
+
+        // Marcamos a mesa como ocupada
         station.setAvailable(false);
         stationRepo.save(station);
 
+        // Vincula a mesa, o usuário e o status ativo à reserva
         booking.setStation(station);
+        booking.setUser(currentUser); // Vincula o usuário real aqui!
         booking.setStatus(BookingStatus.ACTIVE);
 
         return bookingRepo.save(booking);
     }
-
 
     // 2. Lançar Consumo (O garçom adiciona o valor do café/pão de queijo)
     @PatchMapping("/{id}/consume")
@@ -55,6 +64,7 @@ public class BookingController {
 
         return bookingRepo.save(booking);
     }
+
     // 3. Fechar a conta (Agora LIBERANDO a mesa)
     @PostMapping("/{id}/checkout")
     public String checkout(@PathVariable Long id) {
@@ -79,6 +89,7 @@ public class BookingController {
             return "Check-out realizado! O cliente deve pagar R$ " + String.format("%.2f", extra) + " adicionais. Mesa liberada.";
         }
     }
+
     // Listar todas as reservas para conferir nomes, créditos e horários
     @GetMapping
     public List<Booking> getAll() {
@@ -92,5 +103,9 @@ public class BookingController {
         return "Faturamento total das reservas concluídas: R$ " + String.format("%.2f", total);
     }
 
-
+    // NOVO ENDPOINT DE HISTÓRICO PROTEGIDO E FILTRADO POR USUÁRIO:
+    @GetMapping("/history")
+    public List<Booking> getHistory(@AuthenticationPrincipal String username) {
+        return bookingRepo.findByUserUsername(username);
+    }
 }

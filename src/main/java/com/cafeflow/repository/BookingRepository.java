@@ -14,4 +14,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     Double calculateTotalRevenue();
 
     List<Booking> findByStatus(BookingStatus status);
+
+    // Busca todas as reservas filtrando pelo e-mail do usuário logado
+    List<Booking> findByUserUsername(String username);
 }

@@ -11,23 +11,28 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // 1. CORRIGIDO: Relacionamento limpo com a sua entidade User
     @ManyToOne
-    private Station station; // Qual mesa foi reservada
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    private String nomadName;      // Nome do nômade
+    // 2. CORRIGIDO: Adicionado o mapeamento do banco que faltava para a Mesa!
+    @ManyToOne
+    @JoinColumn(name = "station_id")
+    private Station station;
+
+    private String nomadName;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
-    private Double prepaidAmount;  // Valor pago para reservar (ex: R$ 20,00)
-    private Double consumedAmount = 0.0; // Quanto ele já gastou em café
+    private Double prepaidAmount;
+    private Double consumedAmount = 0.0;
 
     @Enumerated(EnumType.STRING)
     private BookingStatus status = BookingStatus.PENDING;
 
-    // Este método roda automaticamente antes da reserva ser salva no banco
     @PrePersist
     protected void onCreate() {
-        this.startTime = LocalDateTime.now(); // Pega a hora exata do computador
+        this.startTime = LocalDateTime.now();
     }
-
 }
