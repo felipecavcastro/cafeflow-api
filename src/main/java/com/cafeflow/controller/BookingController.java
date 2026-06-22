@@ -108,4 +108,5 @@ public class BookingController {
     public List<Booking> getHistory(@AuthenticationPrincipal String username) {
         return bookingRepo.findByUserUsername(username);
     }
+
 }
