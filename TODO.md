@@ -10,4 +10,4 @@
 - [x] Criar filtro de validação do Token (Proteger as rotas)
 - [x] Testar rotas bloqueadas e validação de perfil (ADMIN vs USER)
 - [x] Criar controle de perfis (Filtrar histórico por usuário logado)
-- [ ] Automatizar criação de reserva capturando usuário logado do Token JWT
+- [x] Automatizar criação de reserva capturando usuário logado do Token JWT
