@@ -8,4 +8,6 @@
 - [x] Criar endpoint de faturamento e histórico (/revenue e /history)
 - [x] Implementar Spring Security + JWT (Login e geração de tokens)
 - [x] Criar filtro de validação do Token (Proteger as rotas)
-- [ ] Criar controle de perfis (Admin para o Faturamento / User para o Nômade)
+- [x] Testar rotas bloqueadas e validação de perfil (ADMIN vs USER)
+- [x] Criar controle de perfis (Filtrar histórico por usuário logado)
+- [ ] Automatizar criação de reserva capturando usuário logado do Token JWT

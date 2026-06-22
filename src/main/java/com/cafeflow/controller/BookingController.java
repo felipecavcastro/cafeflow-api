@@ -23,35 +23,39 @@ public class BookingController {
 
     @PostMapping
     public Booking create(@RequestBody Booking booking, @AuthenticationPrincipal String username) {
-        // REGRA DE NEGÓCIO: Valor mínimo de R$ 10,00
+        // 1. REGRA DE NEGÓCIO: Valor mínimo de R$ 10,00
         if (booking.getPrepaidAmount() < 10.0) {
             throw new RuntimeException("O valor mínimo para reserva é R$ 10,00.");
         }
 
-        // Buscamos a mesa real do banco
+        // 2. Buscamos a mesa real do banco
         Station station = stationRepo.findById(booking.getStation().getId())
                 .orElseThrow(() -> new RuntimeException("Mesa não encontrada!"));
 
-        // Verificamos se está disponível
+        // 3. Verificamos se está disponível
         if (!station.isAvailable()) {
             throw new RuntimeException("Esta mesa já está ocupada!");
         }
 
-        // CAPTURA AUTOMÁTICA: Busca o usuário que está logado no token
-        com.cafeflow.model.User currentUser = userRepo.findByUsername(username)
+        // 4. CAPTURA AUTOMÁTICA: Busca o usuário logado pelo username do Token
+        User currentUser = userRepo.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuário logado não encontrado!"));
 
-        // Marcamos a mesa como ocupada
+        // 5. AUTOMATIZAÇÃO: Preenche o nome do nômade baseado no cadastro do usuário
+        booking.setNomadName(currentUser.getUsername()); // Usa o e-mail ou nome cadastrado
+
+        // 6. Atualiza o status da mesa
         station.setAvailable(false);
         stationRepo.save(station);
 
-        // Vincula a mesa, o usuário e o status ativo à reserva
+        // 7. Vincula tudo à reserva e salva
         booking.setStation(station);
-        booking.setUser(currentUser); // Vincula o usuário real aqui!
+        booking.setUser(currentUser); // Vincula o ID do usuário na tabela de histórico
         booking.setStatus(BookingStatus.ACTIVE);
 
         return bookingRepo.save(booking);
     }
+
 
     // 2. Lançar Consumo (O garçom adiciona o valor do café/pão de queijo)
     @PatchMapping("/{id}/consume")
